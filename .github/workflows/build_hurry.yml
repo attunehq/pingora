@@ -35,28 +35,33 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           components: rustfmt, clippy
 
+      - name: Install hurry
+        run: |
+          curl -sSfL https://hurry-releases.s3.amazonaws.com/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Run cargo fmt
-        run: cargo fmt --all -- --check
+        run: hurry cargo fmt --all -- --check
 
       - name: Run cargo build
-        run: cargo build
+        run: hurry cargo build
 
       - name: Run cargo test
-        run: cargo test --verbose --lib --bins --tests --no-fail-fast
+        run: hurry cargo test --verbose --lib --bins --tests --no-fail-fast
 
       # Need to run doc tests separately.
       # (https://github.com/rust-lang/cargo/issues/6669)
       - name: Run cargo doc test
-        run: cargo test --verbose --doc
+        run: hurry cargo test --verbose --doc
 
       - name: Run cargo clippy
         run: |
-          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || cargo clippy --all-targets --all -- --allow=unknown-lints --deny=warnings
+          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || hurry cargo clippy --all-targets --all -- --allow=unknown-lints --deny=warnings
 
       - name: Run cargo audit
         run: |
-          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || (cargo install --locked cargo-audit && cargo audit)
+          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || (hurry cargo install --locked cargo-audit && hurry cargo audit)
 
       - name: Run cargo machete
         run: |
-          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || (cargo install cargo-machete --version 0.7.0 && cargo machete)
+          [[ ${{ matrix.toolchain }} != 1.87.0 ]] || (hurry cargo install cargo-machete --version 0.7.0 && hurry cargo machete)
